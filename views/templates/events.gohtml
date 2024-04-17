@@ -1,0 +1,46 @@
+<div class="card-body" id="card-body">
+    <div class="row">
+        <div class="col">
+            <ol class="breadcrumb mt-1">
+                <li class="breadcrumb-item"><a hx-get="/admin/dashboard" hx-swap="outerHTML" hx-push-url="true"
+                                               hx-target="#card-body" href="">Overview</a></li>
+                <li class="breadcrumb-item active">Events</li>
+            </ol>
+            <h4 class="mt-4">Events</h4>
+            <hr>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col">
+            <table class="table table-condensed table-striped dt-responsive display nowrap table-hover"
+                   id="events-table" style="opacity: 0;width: 100%">
+                <thead>
+                <tr>
+                    <th>Event Type</th>
+                    <th>Host</th>
+                    <th>Service</th>
+                    <th>Date/Time</th>
+                    <th>Message</th>
+                </tr>
+                </thead>
+                <tbody>
+                {{if .DataMap.events }}
+                    {{ if gt (len .DataMap.events) 0}}
+                        {{range .DataMap.events}}
+                            <tr>
+                                <td>{{.EventType}}</td>
+                                <td>{{.HostName}}</td>
+                                <td>{{.ServiceName}}</td>
+                                <td>{{dateFromLayout .CreatedAt "2006-01-02 13:04:05"}}</td>
+                                <td>{{.Message}}</td>
+                            </tr>
+                        {{end}}
+                    {{end}}
+                {{end}}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {{template "componentJs" .}}
+</div>

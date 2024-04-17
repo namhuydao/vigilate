@@ -1,0 +1,34 @@
+label {
+    font-weight: bold;
+    padding-bottom: 0.2em;
+}
+
+.notie-container {
+    z-index: 100250;
+    opacity: 0.85;
+    box-shadow: none;
+    height: 50px;
+}
+
+.notie-textbox-inner {
+    line-height: 10pt;
+    font-size: 14pt;
+}
+
+.border-success, .border-warning, .border-danger, .border-secondary {
+    border: 1px solid;
+}
+
+.card-footer {
+    padding: 0.75rem 1.25rem;
+    background-color: rgba(0, 0, 0, 0.03);
+    border-top: 1px solid rgba(0, 0, 0, 0.125);
+}
+
+.pointer {
+    cursor: pointer;
+}
+
+.body {
+    color: red !important;
+}

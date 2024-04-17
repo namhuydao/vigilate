@@ -1,0 +1,59 @@
+<div class="card-body" id="card-body">
+    <div class="row">
+        <div class="col">
+            <ol class="breadcrumb mt-1">
+                <li class="breadcrumb-item"><a hx-get="/admin/dashboard" hx-swap="outerHTML" hx-push-url="true" hx-target="#card-body"
+                                               href="">Overview</a></li>
+                <li class="breadcrumb-item active">Hosts</li>
+            </ol>
+            <h4 class="mt-4">Hosts</h4>
+            <hr>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col">
+
+            <div class="float-right">
+                <a class="btn btn-outline-secondary" hx-get="/admin/host/0#host" hx-swap="outerHTML" hx-push-url="true" hx-target="#card-body"  href="">New Host</a>
+            </div>
+            <div class="clearfix"></div>
+
+            <table class="table table-condensed table-striped">
+                <thead>
+                <tr>
+                    <th>Host</th>
+                    <th>Services</th>
+                    <th>OS</th>
+                    <th>Location</th>
+                    <th>Status</th>
+                </tr>
+                </thead>
+                <tbody>
+                {{range .DataMap.hosts}}
+                    <tr>
+                        <td><a hx-get="/admin/host/{{.ID}}" hx-swap="outerHTML" hx-push-url="true" hx-target="#card-body"
+                                               href="">{{.HostName}}</a></td>
+                        <td>
+                            {{range .HostServices}}
+                                <span class="badge bg-info">{{.Service.ServiceName}}</span>
+                            {{end}}
+                        </td>
+                        <td>{{.OS}}</td>
+                        <td>{{.Location}}</td>
+                        <td>
+                            {{if eq .Active 1}}
+                                <span class="badge bg-success">Active</span>
+                            {{else}}
+                                <span class="badge bg-danger">Inactive</span>
+                            {{end}}
+                        </td>
+                    </tr>
+                {{end}}
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+{{template "componentJs" .}}
+</div>

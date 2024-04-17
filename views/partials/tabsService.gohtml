@@ -1,0 +1,304 @@
+{{define "tabsService"}}
+    <div class="tab-content" id="host-tab-content" style="min-height: 55vh">
+
+        <div class="tab-pane fade show active" role="tabpanel" aria-labelledby="host-tab"
+             id="host-content">
+            <div class="row">
+                <div class="col-md-6 col-xs-12">
+
+                    <div class="mt-3 mb-3">
+                        <label for="host_name" class="form-label">Host Name</label>
+                        <input required id="host_name" name="host_name" value="{{.DataMap.host.HostName}}"
+                               type="text"
+                               class="form-control">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="canonical_name" class="form-label">Canonical Name</label>
+                        <input required id="canonical_name" name="canonical_name"
+                               value="{{.DataMap.host.CanonicalName}}"
+                               type="text"
+                               class="form-control">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="url" class="form-label">URL</label>
+                        <input required id="url" name="url" value="{{.DataMap.host.URL}}" type="text"
+                               class="form-control">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="ip" class="form-label">IP Address (v4)</label>
+                        <input id="ip" name="ip" value="{{.DataMap.host.IP}}" type="text"
+                               class="form-control">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="ipv6" class="form-label">IP Address (v6)</label>
+                        <input id="ipv6" name="ipv6" value="{{.DataMap.host.IPV6}}" type="text"
+                               class="form-control">
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-xs-12">
+                    <div class="mt-3 mb-3">
+                        <label for="location" class="form-label">Location</label>
+                        <input id="location" name="location" value="{{.DataMap.host.Location}}" type="text"
+                               class="form-control">
+                    </div>
+
+                    <div class="mt-3 mb-3">
+                        <label for="os" class="form-label">Operating System</label>
+                        <input id="os" name="os" value="{{.DataMap.host.OS}}" type="text"
+                               class="form-control">
+                    </div>
+
+                    <div class="form-check form-switch">
+                        <input class="form-check-input"
+                               value="1" {{if eq .DataMap.host.Active 1}} checked {{end}}
+                               type="checkbox" id="active" name="active">
+                        <label class="form-check-label" for="active">Active</label>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <hr>
+                    <div class="btn-group">
+                        <button type="submit" class="btn btn-primary" onclick="validate()">
+                            Save
+                        </button>
+                    </div>
+
+                    <a class="btn btn-info" href="" hx-get="/admin/host/all" hx-swap="outerHTML"
+                       hx-push-url="true" hx-target="#card-body">Cancel</a>
+                </div>
+            </div>
+        </div>
+
+        {{if gt .DataMap.host.ID 0}}
+
+            <div class="tab-pane fade" role="tabpanel" aria-labelledby="services-tab"
+                 id="services-content">
+                <div class="row">
+                    <div class="col">
+                        <h3 class="mt-3">Services</h3>
+
+                        {{template "serviceTable" .}}
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-pane fade" role="tabpanel" aria-labelledby="healthy-tab"
+                 id="healthy-content">
+                <div class="row">
+                    <div class="col">
+                        <h4 class="pt-3">Healthy Services</h4>
+                        <table id="healthy-table" class="table table-striped">
+                            <thead>
+                            <tr>
+                                <th>Service</th>
+                                <th>Last Check</th>
+                                <th>Message</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {{if gt (len .DataMap.host.HostServices) 0}}
+                            {{range .DataMap.host.HostServices}}
+                                {{if eq .Status "healthy"}}
+                                    {{if eq .Active 1}}
+
+                                        <tr id="host-service-{{.ID}}">
+                                            <td>
+                                                <span class="{{.Service.Icon}}"></span>
+                                                {{.Service.ServiceName}}
+                                                <span class="badge bg-secondary pointer"
+                                                      onclick="checkNow({{.ID}}, 'healthy')">
+                                                Check Now
+                                            </span>
+                                            </td>
+                                            <td>
+                                                {{if dateAfterYearOne .LastCheck}}
+                                                    {{dateFromLayout .LastCheck "2006-01-02 15:04"}}
+                                                {{else}}
+                                                    Pending...
+                                                {{end}}
+                                            </td>
+                                            <td>
+                                                {{.LastMessage}}
+                                            </td>
+                                        </tr>
+                                    {{end}}
+                                {{end}}
+                            {{end}}
+                            {{else}}
+                                <tr id="no-service">
+                                    <td colspan="3">No services</td>
+                                </tr>
+                            {{end}}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-pane fade" role="tabpanel" aria-labelledby="warning-tab"
+                 id="warning-content">
+                <div class="row">
+                    <div class="col">
+                        <h4 class="pt-3">Warning Services</h4>
+                        <table id="warning-table" class="table table-striped">
+                            <thead>
+                            <tr>
+                                <th>Service</th>
+                                <th>Last Check</th>
+                                <th>Message</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {{if gt (len .DataMap.host.HostServices) 0}}
+                            {{range .DataMap.host.HostServices}}
+                                {{if eq .Status "warning"}}
+                                    {{if eq .Active 1}}
+                                        <tr id="host-service-{{.ID}}">
+                                            <td>
+                                                <span class="{{.Service.Icon}}"></span>
+                                                {{.Service.ServiceName}}
+                                                <span class="badge bg-secondary pointer"
+                                                      onclick="checkNow({{.ID}}, 'warning')">
+                                                Check Now
+                                            </span>
+                                            </td>
+                                            <td>
+                                                {{if dateAfterYearOne .LastCheck}}
+                                                    {{dateFromLayout .LastCheck "2006-01-02 15:04"}}
+                                                {{else}}
+                                                    Pending...
+                                                {{end}}
+                                            </td>
+                                            <td></td>
+                                        </tr>
+                                    {{end}}
+                                {{end}}
+                            {{end}}
+                            {{else}}
+                                <tr id="no-service">
+                                    <td colspan="3">No services</td>
+                                </tr>
+                            {{end}}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-pane fade" role="tabpanel" aria-labelledby="problem-tab"
+                 id="problem-content">
+                <div class="row">
+                    <div class="col">
+                        <h4 class="pt-3">Problem Services</h4>
+                        <table id="problem-table" class="table table-striped">
+                            <thead>
+                            <tr>
+                                <th>Service</th>
+                                <th>Last Check</th>
+                                <th>Message</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {{if gt (len .DataMap.host.HostServices) 0}}
+                            {{range .DataMap.host.HostServices}}
+                                {{if eq .Status "problem"}}
+                                    {{if eq .Active 1}}
+                                        <tr id="host-service-{{.ID}}">
+                                            <td>
+                                                <span class="{{.Service.Icon}}"></span>
+                                                {{.Service.ServiceName}}
+                                                <span class="badge bg-secondary pointer"
+                                                      onclick="checkNow({{.ID}}, 'problem')">
+                                                Check Now
+                                            </span>
+                                            </td>
+                                            <td>
+                                                {{if dateAfterYearOne .LastCheck}}
+                                                    {{dateFromLayout .LastCheck "2006-01-02 15:04"}}
+                                                {{else}}
+                                                    Pending...
+                                                {{end}}
+                                            </td>
+                                            <td></td>
+                                        </tr>
+                                    {{end}}
+                                {{end}}
+                            {{end}}
+                            {{else}}
+                                <tr id="no-service">
+                                    <td colspan="3">No services</td>
+                                </tr>
+                            {{end}}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-pane fade" role="tabpanel" aria-labelledby="pending-tab"
+                 id="pending-content">
+
+                <div class="row">
+                    <div class="col">
+                        <h4 class="pt-3">Pending Services</h4>
+                        <table id="pending-table" class="table table-striped">
+                            <thead>
+                            <tr>
+                                <th>Service</th>
+                                <th>Last Check</th>
+                                <th>Message</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {{if gt (len .DataMap.host.HostServices) 0}}
+                            {{range .DataMap.host.HostServices}}
+                                {{if eq .Status "pending"}}
+                                    {{if eq .Active 1}}
+                                        <tr id="host-service-{{.ID}}">
+                                            <td>
+                                                <span class="{{.Service.Icon}}"></span>
+                                                {{.Service.ServiceName}}
+                                                <span class="badge bg-secondary pointer"
+                                                      onclick="checkNow({{.ID}}, 'pending')">
+                                                Check Now
+                                            </span>
+                                            </td>
+                                            <td>
+                                                {{if dateAfterYearOne .LastCheck}}
+                                                    {{ dateFromLayout .LastCheck "2006-01-02 15:04"}}
+                                                {{else}}
+                                                    Pending...
+                                                {{end}}
+                                            </td>
+                                            <td>
+                                                {{.LastMessage}}
+                                            </td>
+                                        </tr>
+                                    {{end}}
+                                {{end}}
+                            {{end}}
+                            {{else}}
+                                <tr id="no-service">
+                                    <td colspan="3">No services</td>
+                                </tr>
+                            {{end}}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        {{end}}
+    </div>
+    <script>
+
+    </script>
+{{end}}

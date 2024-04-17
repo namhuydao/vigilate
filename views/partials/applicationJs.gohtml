@@ -1,0 +1,70 @@
+{{define "applicationJs"}}
+    <script>
+
+        let monitoring = document.getElementById("monitoring-live")
+        monitoring.addEventListener('change', function () {
+            let enabled = monitoring.checked;
+            if (!enabled) {
+                attention.confirm({
+                    html: "This will stop monitoring of all hosts and services. Are you sure?",
+                    callback: function (result) {
+                        if (result) {
+                            updateSystemPref("monitoring_live", "0");
+                            toggleMonitoring(0)
+                        } else {
+                            monitoring.checked = true
+                        }
+                    }
+                })
+            } else {
+                updateSystemPref("monitoring_live", "1");
+                toggleMonitoring(1)
+            }
+        })
+
+        function updateSystemPref(prefName, prefValue) {
+            let params = {
+                "pref_name": prefName,
+                "pref_value": prefValue
+            };
+
+            fetch("/admin/preference/ajax/set-system-pref", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRF-Token": "{{.CSRFToken}}"
+                    },
+                    body: JSON.stringify(params)
+                }
+            ).then(response => response.json())
+                .then(data => {
+                    if (!data.ok) {
+                        errorAlert("Errors: " + data.message)
+                    }
+                })
+        }
+
+        function toggleMonitoring(enabled) {
+            let params = {
+                "enabled": enabled
+            };
+
+            fetch("/admin/preference/ajax/toggle-monitoring", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRF-Token": "{{.CSRFToken}}"
+                    },
+                    body: JSON.stringify(params)
+                }
+            ).then(response => response.json())
+                .then(data => {
+                    if (!data.ok) {
+                        errorAlert("Errors: " + data.message)
+                    }
+                })
+        }
+
+        let attention = Prompt()
+    </script>
+{{end}}

@@ -1,0 +1,34 @@
+{{define "serviceTable"}}
+    <table class="table table-striped" id="service-table">
+        <thead>
+        <tr>
+            <th>Service</th>
+            <th>Status</th>
+        </tr>
+        </thead>
+        <tbody>
+
+        {{range .DataMap.host.HostServices}}
+            <tr>
+                <td>{{.Service.ServiceName}}</td>
+                <td>
+                    <form>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" value="1" type="checkbox"
+                                   data-type="toggle-service"
+                                   data-status="{{.Status}}"
+                                   data-service="{{.ServiceID}}"
+                                   data-host-id="{{.HostID}}"
+                                    {{if eq .Active 1}}
+                                        checked
+                                    {{end}}
+                                   name="{{.Service.ServiceName}}" onclick="toggle(this)">
+                            <label class="form-check-label" for="active">Active</label>
+                        </div>
+                    </form>
+                </td>
+            </tr>
+        {{end}}
+        </tbody>
+    </table>
+{{end}}

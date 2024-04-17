@@ -1,0 +1,126 @@
+<div class="card-body" id="card-body">
+    <div class="row">
+        <div class="col">
+            <ol class="breadcrumb mt-1">
+                <li class="breadcrumb-item"><a hx-get="/admin/dashboard" hx-swap="outerHTML" hx-push-url="true" hx-target="#card-body"
+                                               href="">Overview</a></li>
+                <li class="breadcrumb-item"><a hx-get="/admin/users" hx-swap="outerHTML" hx-push-url="true" hx-target="#card-body"
+                                               href="">Users</a></li>
+                <li class="breadcrumb-item active">User</li>
+            </ol>
+            <h4 class="mt-4">User</h4>
+            <hr>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col">
+            <form method="post" id="settings-form" action="/admin/user/{{.DataMap.user.ID}}" novalidate
+                  class="needs-validation">
+                <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+
+                <div class="mb-3">
+                    <label for="first_name">First Name</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-font fa-fw"></i></span>
+                        <input class="form-control required"
+                               id="first_name"
+                               required
+                               autocomplete="off" type='text'
+                               name='first_name'
+                               value='{{.DataMap.user.FirstName}}'>
+                        <div class="invalid-feedback">
+                            Please enter a value
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="last_name">Last Name</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-font fa-fw"></i></span>
+                        <input class="form-control required"
+                               id="last_name"
+                               required
+                               autocomplete="off" type='text'
+                               name='last_name'
+                               value='{{.DataMap.user.LastName}}'>
+                        <div class="invalid-feedback">
+                            Please enter a value
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="email">Email</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-envelope fa-fw"></i></span>
+                        <input class="form-control required"
+                               id="email"
+                               required
+                               autocomplete="off" type='email'
+                               name='email'
+                               value='{{.DataMap.user.Email}}'>
+                        <div class="invalid-feedback">
+                            Please enter a value
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="password">Password</label>
+                    <small><span class="text-muted">(leave empty to retain existing password)</span></small>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-lock fa-fw"></i></span>
+                        <input class="form-control"
+                               id="password"
+                                {{if eq .DataMap.user.ID 0}}
+                                    required
+                                {{end}}
+                               autocomplete="off" type='password'
+                               name='password'
+                               value=''>
+                        <div class="invalid-feedback">
+                            Please enter a value
+                        </div>
+                    </div>
+                </div>
+
+                {{if eq .DataMap.user.ID .User.ID}}
+                    <input type="hidden" name="user_active" value="{{.DataMap.user.UserActive}}">
+                {{else}}
+                    <div class="mb-3">
+                        <label for="user_active">Status</label>
+                        <div class="input-group">
+                            <select class="form-select" name="user_active">
+                                <option value="1" {{if eq .DataMap.user.UserActive 1}} selected {{end}}>Active</option>
+                                <option value="0" {{if eq .DataMap.user.UserActive 0}} selected {{end}}>Inactive
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+                {{end}}
+
+                <hr>
+
+                <div class="float-left">
+
+                    <input type="submit" class="btn btn-primary" value="Save">
+
+                    <a class="btn btn-info" hx-get="/admin/users" hx-swap="outerHTML" hx-target="#card-body" hx-push-url="true">Cancel</a>
+                </div>
+
+                <div class="float-right">
+                    {{if gt .DataMap.user.ID 0}}
+                        {{if ne .DataMap.user.ID .User.ID}}
+                            <a class="btn btn-danger" href="javascript:void(0);">Delete</a>
+                        {{end}}
+                    {{end}}
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+{{template "componentJs" .}}
+</div>

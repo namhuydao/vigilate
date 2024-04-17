@@ -1,0 +1,35 @@
+{{ define "overviewTable"}}
+    <table id="{{.DataMap.TableName}}-table" class="table table-condensed table-striped">
+        <thead>
+        <tr>
+            <th>Host</th>
+            <th>Service</th>
+            <th>Status</th>
+            <th>Message</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{if gt (len .DataMap.services) 0}}
+            {{ $tableName := .DataMap.TableName }}
+            {{ $tableNameUp := .DataMap.TableNameUp }}
+            {{ range .DataMap.services }}
+                <tr id="host-service-{{.ID}}">
+                    <td>
+                        <a href="" hx-vals='{"activeTab": "#{{$tableName}}"}' hx-get="/admin/host/{{.HostID}}"
+                           hx-swap="outerHTML" hx-push-url="true" hx-target="#card-body">
+                            {{.HostName}}
+                        </a>
+                    </td>
+                    <td>{{.Service.ServiceName}}</td>
+                    <td><span class="badge bg-info-dark">{{$tableNameUp}}</span></td>
+                    <td>{{.LastMessage}}</td>
+                </tr>
+            {{end}}
+        {{else}}
+            <tr id="no-service">
+                <td colspan="4">No services</td>
+            </tr>
+        {{end}}
+        </tbody>
+    </table>
+{{end}}

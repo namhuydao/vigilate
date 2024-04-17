@@ -1,0 +1,115 @@
+{{define "componentJs"}}
+    <script>
+        document.title = {{ .DataMap.PageTitle }};
+
+        document.addEventListener("htmx:beforeSwap", function (event) {
+            if (event.detail.pathInfo.requestPath === "/admin/events") {
+                let table = htmx.find("#events-table")
+                if (table) {
+                    table.style.display = "none"
+                }
+            }
+        })
+
+        if (htmx.find("#events-table")) {
+            let table = htmx.find("#events-table")
+             let t = new DataTable("#events-table", {
+                    responsive: true
+                });
+                table.style.opacity = "1";
+        }
+
+        function checkNow(id, oldStatus) {
+            fetch(" http://localhost:4000/admin/perform-check/" + id + "/" + oldStatus).then(response => response.json())
+                .then(data => {
+                    if (data.ok) {
+                        if (data.old_status !== data.new_status) {
+                            attention.toast({
+                                msg: data.message,
+                                icon: "info",
+                                timer: 5000,
+                                showCloseButton: true
+                            })
+                        } else {
+                            attention.toast({
+                                msg: "Service is still in " + data.new_status + " state",
+                                icon: "info",
+                                timer: 5000,
+                                showCloseButton: true
+                            })
+                        }
+
+                    } else {
+                        errorAlert("Something went wrong")
+                    }
+                })
+        }
+
+        if ({{.DataMap.ActiveTab}}) {
+
+            // Remove the active class from all tab links
+            document.querySelectorAll('.nav-link').forEach(function (link) {
+                link.classList.remove('show');
+                link.classList.remove('active');
+            });
+
+            document.querySelectorAll('.tab-pane').forEach(function (link) {
+                link.classList.remove('show');
+                link.classList.remove('active');
+            });
+
+
+            let activeTabSelector = `{{.DataMap.ActiveTab}}-tab`;
+            let activeContentSelector = `{{.DataMap.ActiveTab}}-content`;
+            // Add the active class to the desired tab link
+            document.querySelector(activeTabSelector).classList.add('show');
+            document.querySelector(activeTabSelector).classList.add('active');
+            document.querySelector(activeContentSelector).classList.add('show');
+            document.querySelector(activeContentSelector).classList.add('active');
+        }
+
+        // Validate input
+        function validate() {
+            let form = document.getElementById("form");
+            if (form.checkValidity() === false) {
+                errorAlert("Error: check all tabs!")
+                this.event.preventDefault()
+                this.event.stopPropagation()
+            }
+            form.classList.add("was-validated");
+        }
+
+        function toggle(input) {
+            let params = {
+                "host_id": input.getAttribute("data-host-id"),
+                "service_id": input.getAttribute("data-service"),
+                "active": input.checked ? "1" : "0",
+                "status": input.getAttribute("data-status")
+            };
+
+            htmx.ajax("POST", "/admin/host/toggle-service", {
+                headers: {
+                    "HX-Request": "true",
+                    "Content-Type": "application/x-www-form-urlencoded",
+                    "X-CSRF-Token": "{{.CSRFToken}}"
+                },
+                values: params,
+                swap: "none",
+            }).then(() => {
+                successAlert("Change saved")
+            })
+        }
+
+        {{if ne .Flash ""}}
+        successAlert('{{.Flash}}');
+        {{end}}
+
+        {{if ne .Warning ""}}
+        warningAlert('{{.Warning}}');
+        {{end}}
+
+        {{if ne .Error ""}}
+        errorAlert('{{.Error}}');
+        {{end}}
+    </script>
+{{end}}
